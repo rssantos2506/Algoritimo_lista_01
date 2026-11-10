@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizador de Algoritmos & Análise Big-O</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#0f172a',
+                        cardBg: '#1e293b',
+                        accentBlue: '#38bdf8',
+                        accentPurple: '#a855f7',
+                        accentGreen: '#4ade80',
+                        accentYellow: '#facc15',
+                        accentRed: '#f87171'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Chart.js para visualização teórica e empírica da complexidade -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Fontes e Ícones -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+        .code-font {
+            font-family: 'Fira Code', monospace;
+        }
+        .bar-transition {
+            transition: height 0.1s ease, background-color 0.1s ease;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+    <!-- HEADER / NAVEGAÇÃO SUPERIOR -->
+    <header class="bg-cardBg border-b border-slate-700/60 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-sky-500/20">
+                    <i class="fa-solid fa-graduation-cap text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold text-slate-100 leading-tight">Laboratório de Algoritmos</h1>
+                    <p class="text-xs text-sky-400 font-medium">Visualização & Análise de Complexidade Big-O</p>
+                </div>
+            </div>
+
+            <!-- TAB SWITCHER -->
+            <div class="flex bg-slate-900/80 p-1.5 rounded-xl border border-slate-700/80">
+                <button id="tabVisualizerBtn" class="flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all duration-200 bg-sky-500 text-white shadow">
+                    <i class="fa-solid fa-chart-column"></i>
+                    <span>Visualizador</span>
+                </button>
+                <button id="tabBigOBtn" class="flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-slate-200">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span>Análise Big-O</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow">
+
+        <!-- ============================================================================== -->
+        <!-- ABA 1: VISUALIZADOR DE ALGORITMOS -->
+        <!-- ============================================================================== -->
+        <section id="tabVisualizer" class="space-y-6">
+            
+            <!-- CONTROLES SUPERIORES -->
+            <div class="bg-cardBg rounded-2xl p-5 border border-slate-700/60 shadow-xl space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    
+                    <!-- Seleção do Algoritmo -->
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-semibold uppercase tracking-wider text-slate-400">Algoritmo</label>
+                        <select id="algorithmSelect" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-sky-500">
+                            <option value="selection">Selection Sort - O(N²)</option>
+                            <option value="bubble">Bubble Sort - O(N²)</option>
+                            <option value="insertion">Insertion Sort - O(N²)</option>
+                            <option value="merge">Merge Sort - O(N log N)</option>
+                            <option value="quick" selected>Quick Sort - O(N log N)</option>
+                            <option value="heap">Heap Sort - O(N log N)</option>
+                            <option value="counting">Counting Sort - O(N + K)</option>
+                            <option value="radix">Radix Sort - O(d*(N+K))</option>
+                            <option value="bucket">Bucket Sort - O(N + K)</option>
+                        </select>
+                    </div>
+
+                    <!-- Padrão do Array -->
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-semibold uppercase tracking-wider text-slate-400">Estado Inicial</label>
+                        <select id="arrayTypeSelect" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-sky-500">
+                            <option value="random" selected>Aleatório</option>
+                            <option value="nearly-sorted">Quase Ordenado</option>
+                            <option value="reversed">Invertido (Pior Caso)</option>
+                        </select>
+                    </div>
+
+                    <!-- Slider: Tamanho do Array -->
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between text-xs font-semibold uppercase tracking-wider text-slate-400">
+                            <span>Tamanho (N)</span>
+                            <span id="arraySizeVal" class="text-sky-400 font-bold">40</span>
+                        </div>
+                        <input id="arraySizeSlider" type="range" min="10" max="100" value="40" class="w-full h-2 bg-slate-900 rounded-lg appearance-none cursor-pointer accent-sky-500">
+                    </div>
+
+                    <!-- Slider: Velocidade -->
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between text-xs font-semibold uppercase tracking-wider text-slate-400">
+                            <span>Velocidade</span>
+                            <span id="speedVal" class="text-sky-400 font-bold">Média</span>
+                        </div>
+                        <input id="speedSlider" type="range" min="1" max="100" value="60" class="w-full h-2 bg-slate-900 rounded-lg appearance-none cursor-pointer accent-sky-500">
+                    </div>
+
+                </div>
+
+                <!-- BOTOES DE AÇÃO -->
+                <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-700/50">
+                    <div class="flex items-center gap-2">
+                        <button id="startBtn" class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-sm shadow-lg shadow-sky-500/20 transition-all">
+                            <i class="fa-solid fa-play"></i> <span>Iniciar</span>
+                        </button>
+                        <button id="pauseBtn" disabled class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 font-semibold text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:bg-amber-500/30 transition-all">
+                            <i class="fa-solid fa-pause"></i> <span>Pausar</span>
+                        </button>
+                        <button id="stepBtn" disabled class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-purple-500/20 border border-purple-500/40 text-purple-300 font-semibold text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:bg-purple-500/30 transition-all">
+                            <i class="fa-solid fa-step-forward"></i> <span>Passo</span>
+                        </button>
+                        <button id="resetBtn" class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 font-semibold text-sm transition-all">
+                            <i class="fa-solid fa-rotate-left"></i> <span>Novo Array</span>
+                        </button>
+                    </div>
+
+                    <!-- LEGENDA DE CORES -->
+                    <div class="flex items-center gap-4 text-xs font-medium text-slate-400 bg-slate-900/60 px-4 py-2 rounded-xl border border-slate-800">
+                        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-sky-500"></span> Padrão</div>
+                        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-amber-400"></span> Comparando</div>
+                        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-rose-500"></span> Troca / Escrita</div>
+                        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-emerald-400"></span> Ordenado</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CANVAS DE VISUALIZAÇÃO -->
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <!-- ÁREA DAS BARRAS ANIMADAS -->
+                <div class="lg:col-span-3 bg-cardBg rounded-2xl p-6 border border-slate-700/60 shadow-xl flex flex-col justify-between min-h-[420px]">
+                    <div id="barContainer" class="w-full flex-grow flex items-end justify-center gap-1 min-h-[320px] pt-4">
+                        <!-- Barras serão injetadas via JS -->
+                    </div>
+
+                    <!-- METRICAS EM TEMPO REAL -->
+                    <div class="grid grid-cols-3 gap-4 pt-4 mt-4 border-t border-slate-700/60">
+                        <div class="bg-slate-900/70 p-3 rounded-xl border border-slate-800 text-center">
+                            <span class="block text-xs font-medium text-slate-400 uppercase">Comparações</span>
+                            <span id="metricComparisons" class="text-xl font-bold text-sky-400 code-font">0</span>
+                        </div>
+                        <div class="bg-slate-900/70 p-3 rounded-xl border border-slate-800 text-center">
+                            <span class="block text-xs font-medium text-slate-400 uppercase">Acessos / Trocas</span>
+                            <span id="metricSwaps" class="text-xl font-bold text-rose-400 code-font">0</span>
+                        </div>
+                        <div class="bg-slate-900/70 p-3 rounded-xl border border-slate-800 text-center">
+                            <span class="block text-xs font-medium text-slate-400 uppercase">Tempo Decorrido</span>
+                            <span id="metricTime" class="text-xl font-bold text-emerald-400 code-font">0.0 ms</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD EXPLICATIVO DO ALGORITMO SELECIONADO -->
+                <div class="bg-cardBg rounded-2xl p-5 border border-slate-700/60 shadow-xl flex flex-col justify-between space-y-4">
+                    <div>
+                        <div class="flex items-center justify-between border-b border-slate-700/60 pb-3 mb-3">
+                            <h2 id="algoTitle" class="text-base font-bold text-slate-100">Quick Sort</h2>
+                            <span id="algoBadge" class="px-2.5 py-1 rounded-full text-xs font-bold bg-sky-500/10 text-sky-400 border border-sky-500/20">O(N log N)</span>
+                        </div>
+                        <p id="algoDesc" class="text-xs text-slate-300 leading-relaxed mb-4">
+                            Divide a lista em sub-vetores usando um pivô. Elementos menores ficam à esquerda e maiores à direita.
+                        </p>
+
+                        <!-- COMPLEXIDADES RAPIDAS -->
+                        <div class="space-y-2 text-xs">
+                            <div class="flex justify-between p-2 rounded-lg bg-slate-900/60 border border-slate-800">
+                                <span class="text-slate-400">Melhor Caso:</span>
+                                <span id="algoBest" class="font-semibold text-emerald-400 code-font">O(N log N)</span>
+                            </div>
+                            <div class="flex justify-between p-2 rounded-lg bg-slate-900/60 border border-slate-800">
+                                <span class="text-slate-400">Médio Caso:</span>
+                                <span id="algoAvg" class="font-semibold text-sky-400 code-font">O(N log N)</span>
+                            </div>
+                            <div class="flex justify-between p-2 rounded-lg bg-slate-900/60 border border-slate-800">
+                                <span class="text-slate-400">Pior Caso:</span>
+                                <span id="algoWorst" class="font-semibold text-rose-400 code-font">O(N²)</span>
+                            </div>
+                            <div class="flex justify-between p-2 rounded-lg bg-slate-900/60 border border-slate-800">
+                                <span class="text-slate-400">Espaço Auxiliar:</span>
+                                <span id="algoSpace" class="font-semibold text-purple-400 code-font">O(log N)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- STATUS DE EXECUÇÃO -->
+                    <div id="executionStatus" class="p-3 rounded-xl bg-slate-900 border border-slate-800 text-center text-xs text-slate-400">
+                        Aguardando início...
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ============================================================================== -->
+        <!-- ABA 2: GRÁFICOS E ANÁLISE DE COMPLEXIDADE BIG-O -->
+        <!-- ============================================================================== -->
+        <section id="tabBigO" class="hidden space-y-6">
+            
+            <!-- PAINEL SUPERIOR: PARECER TEÓRICO E GRÁFICO COMPARATIVO -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- GRÁFICO CHART.JS -->
+                <div class="lg:col-span-2 bg-cardBg rounded-2xl p-6 border border-slate-700/60 shadow-xl space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-base font-bold text-slate-100">Curvas Teóricas vs Esforço Computacional</h2>
+                            <p class="text-xs text-slate-400">Crescimento do número de operações em função do tamanho da entrada (N)</p>
+                        </div>
+                        <button id="runBenchmarkBtn" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs transition-all shadow-lg shadow-purple-600/20">
+                            <i class="fa-solid fa-bolt"></i> <span>Executar Benchmark</span>
+                        </button>
+                    </div>
+
+                    <!-- Canvas para Chart.js -->
+                    <div class="relative w-full h-[340px]">
+                        <canvas id="bigOChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- CARDS INFORMATIVOS DE COMPLEXIDADE -->
+                <div class="space-y-4 flex flex-col justify-between">
+                    <div class="bg-cardBg rounded-2xl p-5 border border-slate-700/60 shadow-xl space-y-3">
+                        <h3 class="text-sm font-bold text-sky-400 flex items-center gap-2">
+                            <i class="fa-solid fa-lightbulb"></i> O que é a Notação Big-O?
+                        </h3>
+                        <p class="text-xs text-slate-300 leading-relaxed">
+                            A notação <strong>Big-O</strong> descreve o limite superior do tempo de execução ou uso de memória de um algoritmo no <em>pior caso</em>, em função do tamanho da entrada ($N$). Ela ignora constantes e foca no comportamento assintótico.
+                        </p>
+                    </div>
+
+                    <div class="bg-cardBg rounded-2xl p-5 border border-slate-700/60 shadow-xl space-y-2">
+                        <div class="text-xs font-bold text-emerald-400">O(1) & O(N + K) - Linear/Constante</div>
+                        <p class="text-[11px] text-slate-400">Excelente desempenho. Cresce de forma direta ou quase insensível ao tamanho do array.</p>
+                        
+                        <div class="text-xs font-bold text-sky-400 pt-2">O(N log N) - Logarítmico</div>
+                        <p class="text-[11px] text-slate-400">Padrão-ouro para ordenação baseada em comparação (Merge, Quick, Heap Sort).</p>
+                        
+                        <div class="text-xs font-bold text-rose-400 pt-2">O(N²) - Quadrático</div>
+                        <p class="text-[11px] text-slate-400">Ineficiente para grandes volumes. O tempo quadruplica ao dobrar a entrada.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TABELA RESUMO COMPLETA DOS 9 ALGORITMOS -->
+            <div class="bg-cardBg rounded-2xl p-6 border border-slate-700/60 shadow-xl overflow-hidden">
+                <h2 class="text-base font-bold text-slate-100 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-table-list text-sky-400"></i> Quadro Comparativo Geral dos 9 Algoritmos
+                </h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead>
+                            <tr class="border-b border-slate-700/80 bg-slate-900/60 text-slate-400 font-semibold uppercase tracking-wider">
+                                <th class="p-3">Algoritmo</th>
+                                <th class="p-3">Melhor Caso</th>
+                                <th class="p-3">Médio Caso</th>
+                                <th class="p-3">Pior Caso</th>
+                                <th class="p-3">Espaço Aux.</th>
+                                <th class="p-3">Estável?</th>
+                                <th class="p-3">Tipo / Método</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800/60 text-slate-300 code-font">
+                            <tr class="hover:bg-slate-800/40 transition-colors">
+                                <td class="p-3 font-bold text-slate-200">Selection Sort</td>
+                                <td class="p-3 text-rose-400">O(N²)</td>
+                                <td class="p-3 text-rose-400">O(N²)</td>
+                                <td class="p-3 text-rose-400">O(N²)</td>
+                                <td class="p-3 text-emerald-400">O(1)</td>
+                                <td class="p-3 text-rose-400">Não</td>
+                                <td class="p-3 text-slate-400 font-sans">Seleção Direta</td>
+                            </tr>
+                            <tr class="hover:bg-slate-800/40 transition-colors">
+                                <td class="p-3 font-bold text-slate-200">Bubble Sort</td>
+                                <td class="p-3 text-emerald-400">O(N)</td>
+                                <td class="p-3 text-rose-400">O(N²)</td>
+                                <td class="p-3 text-rose-400">O(N²)</td>
+                                <td class="p-3 text-emerald-400">O(1)</td>
+                                <td class="p-3 text-emerald-400">Sim</td>
+                                <td class="p-3 text-slate-400 font-sans">Troca Adjacente</td>
+                            </tr>
+                            <tr class="hover:bg-slate-800/40 transition-colors">
+                                <td class="p-3 font-bold text-slate-200">Insertion Sort</td>
+                                <td class="p-3 text-emerald-400">O(N)</td>
+                                <td class="p-3 text-rose-400">O(N²)</td>
+                                <td class="p-3 text-rose-400">O(N²)</td>
+                                <td class="p-3 text-emerald-400">O(1)</td>
+                                <td class="p-3 text-emerald-400">Sim</td>
+                                <td class="p-3 text-slate-400 font-sans">Inserção incremental</td>
+                            </tr>
+                            <tr class="hover:bg-slate-800/40 transition-colors">
+                                <td class="p-3 font-bold text-slate-200">Merge Sort</td>
+                                <td class="p-3 text-sky-400">O(N log N)</td>
+                                <td class="p-3 text-sky-400">O(N log N)</td>
+                                <td class="p-3 text-sky-400">O(N log N)</td>
+                                <td class="p-3 text-amber-400">O(N)</td>
+                                <td class="p-3 text-emerald-400">Sim</td>
+                                <td class="p-3 text-slate-400 font-sans">Divisão e Conquista</td>
+                            </tr>
+                            <tr class="hover:bg-slate-800/40 transition-colors">
+                                <td class="p-3 font-bold text-slate-200">Quick Sort</td>
+                                <td class="p-3 text-sky-400">O(N log N)</td>
+                                <td class="p-3 text-sky-400">O(N log N)</td>
+                                <td class="p-3 text-rose-400">O(N²)</td>
+                                <td class="p-3 text-sky-400">O(log N)</td>
+                                <td class="p-3 text-rose-400">Não</td>
+                                <td class="p-3 text-slate-400 font-sans">Particionamento Pivô</td>
+                            </tr>
+                            <tr class="hover:bg-slate-800/40 transition-colors">
+                                <td class="p-3 font-bold text-slate-200">Heap Sort</td>
+                                <td class="p-3 text-sky-400">O(N log N)</td>
+                                <td class="p-3 text-sky-400">O(N log N)</td>
+                                <td class="p-3 text-sky-400">O(N log N)</td>
+                                <td class="p-3 text-emerald-400">O(1)</td>
+                                <td class="p-3 text-rose-400">Não</td>
+                                <td class="p-3 text-slate-400 font-sans">Árvore Heap Máximo</td>
+                            </tr>
+                            <tr class="hover:bg-slate-800/40 transition-colors">
+                                <td class="p-3 font-bold text-slate-200">Counting Sort</td>
+                                <td class="p-3 text-emerald-400">O(N + K)</td>
+                                <td class="p-3 text-emerald-400">O(N + K)</td>
+                                <td class="p-3 text-emerald-400">O(N + K)</td>
+                                <td class="p-3 text-amber-400">O(K)</td>
+                                <td class="p-3 text-emerald-400">Sim</td>
+                                <td class="p-3 text-slate-400 font-sans">Contagem de Frequência</td>
+                            </tr>
+                            <tr class="hover:bg-slate-800/40 transition-colors">
+                                <td class="p-3 font-bold text-slate-200">Radix Sort</td>
+                                <td class="p-3 text-emerald-400">O(d*(N+K))</td>
+                                <td class="p-3 text-emerald-400">O(d*(N+K))</td>
+                                <td class="p-3 text-emerald-400">O(d*(N+K))</td>
+                                <td class="p-3 text-amber-400">O(N + K)</td>
+                                <td class="p-3 text-emerald-400">Sim</td>
+                                <td class="p-3 text-slate-400 font-sans">Distribuição por Dígito</td>
+                            </tr>
+                            <tr class="hover:bg-slate-800/40 transition-colors">
+                                <td class="p-3 font-bold text-slate-200">Bucket Sort</td>
+                                <td class="p-3 text-emerald-400">O(N + K)</td>
+                                <td class="p-3 text-emerald-400">O(N + K)</td>
+                                <td class="p-3 text-rose-400">O(N²)</td>
+                                <td class="p-3 text-amber-400">O(N + K)</td>
+                                <td class="p-3 text-emerald-400">Sim</td>
+                                <td class="p-3 text-slate-400 font-sans">Baldes Uniformes</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-cardBg border-t border-slate-700/60 py-4 text-center text-xs text-slate-500">
+        Desenvolvido para Cursos Universitários de Ciência da Computação & Algoritmos
+    </footer>
+
+    <!-- SCRIPT PRINCIPAL E MOTOR DE VISUALIZAÇÃO -->
+    <script>
+        // ==============================================================================
+        // METADADOS E INFORMAÇÕES DIDÁTICAS DOS ALGORITMOS
+        // ==============================================================================
+        const ALGORITHM_INFO = {
+            selection: {
+                name: "Selection Sort",
+                badge: "O(N²)",
+                desc: "Procura repetidamente o menor elemento da sublista não ordenada e o coloca na posição correta.",
+                best: "O(N²)", avg: "O(N²)", worst: "O(N²)", space: "O(1)"
+            },
+            bubble: {
+                name: "Bubble Sort",
+                badge: "O(N²)",
+                desc: "Compara elementos adjacentes e os troca se estiverem fora de ordem. Maiores valores 'flutuam' para o fim.",
+                best: "O(N)", avg: "O(N²)", worst: "O(N²)", space: "O(1)"
+            },
+            insertion: {
+                name: "Insertion Sort",
+                badge: "O(N²)",
+                desc: "Constrói a ordenação final inserindo um item por vez no local correto dentro do subvetor já ordenado.",
+                best: "O(N)", avg: "O(N²)", worst: "O(N²)", space: "O(1)"
+            },
+            merge: {
+                name: "Merge Sort",
+                badge: "O(N log N)",
+                desc: "Divisão e conquista: Divide o vetor ao meio recursivamente e intercala (merge) os subvetores ordenados.",
+                best: "O(N log N)", avg: "O(N log N)", worst: "O(N log N)", space: "O(N)"
+            },
+            quick: {
+                name: "Quick Sort",
+                badge: "O(N log N)",
+                desc: "Escolhe um pivô, particiona os dados em menores/maiores e ordena as partições recursivamente.",
+                best: "O(N log N)", avg: "O(N log N)", worst: "O(N²)", space: "O(log N)"
+            },
+            heap: {
+                name: "Heap Sort",
+                badge: "O(N log N)",
+                desc: "Transforma o vetor em uma árvore Max-Heap, extrai o maior elemento na raiz e reconstrói o heap.",
+                best: "O(N log N)", avg: "O(N log N)", worst: "O(N log N)", space: "O(1)"
+            },
+            counting: {
+                name: "Counting Sort",
+                badge: "O(N + K)",
+                desc: "Algoritmo não comparativo. Conta a frequência de cada chave e calcula as posições diretas no vetor final.",
+                best: "O(N + K)", avg: "O(N + K)", worst: "O(N + K)", space: "O(K)"
+            },
+            radix: {
+                name: "Radix Sort",
+                badge: "O(d*(N+K))",
+                desc: "Ordena os números dígito por dígito (do menos significativo para o mais significativo) usando Counting Sort.",
+                best: "O(d*(N+K))", avg: "O(d*(N+K))", worst: "O(d*(N+K))", space: "O(N + K)"
+            },
+            bucket: {
+                name: "Bucket Sort",
+                badge: "O(N + K)",
+                desc: "Distribui os elementos em baldes com base no intervalo de valores e ordena cada balde individualmente.",
+                best: "O(N + K)", avg: "O(N + K)", worst: "O(N²)", space: "O(N + K)"
+            }
+        };
+
+        // ==============================================================================
+        // ESTADO GLOBAL DO APLICATIVO
+        // ==============================================================================
+        let array = [];
+        let animationSteps = [];
+        let currentStep = 0;
+        let isRunning = false;
+        let isPaused = false;
+        let animationTimeout = null;
+
+        // Métricas
+        let comparisonsCount = 0;
+        let swapsCount = 0;
+        let startTime = 0;
+
+        // Elementos DOM
+        const barContainer = document.getElementById('barContainer');
+        const algorithmSelect = document.getElementById('algorithmSelect');
+        const arrayTypeSelect = document.getElementById('arrayTypeSelect');
+        const arraySizeSlider = document.getElementById('arraySizeSlider');
+        const arraySizeVal = document.getElementById('arraySizeVal');
+        const speedSlider = document.getElementById('speedSlider');
+        const speedVal = document.getElementById('speedVal');
+
+        const startBtn = document.getElementById('startBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const stepBtn = document.getElementById('stepBtn');
+        const resetBtn = document.getElementById('resetBtn');
+
+        const metricComparisons = document.getElementById('metricComparisons');
+        const metricSwaps = document.getElementById('metricSwaps');
+        const metricTime = document.getElementById('metricTime');
+        const executionStatus = document.getElementById('executionStatus');
+
+        // Tabs
+        const tabVisualizerBtn = document.getElementById('tabVisualizerBtn');
+        const tabBigOBtn = document.getElementById('tabBigOBtn');
+        const tabVisualizer = document.getElementById('tabVisualizer');
+        const tabBigO = document.getElementById('tabBigO');
+
+        // ==============================================================================
+        // INICIALIZAÇÃO
+        // ==============================================================================
+        window.onload = () => {
+            generateNewArray();
+            updateAlgorithmCard();
+            initChart();
+        };
+
+        // Tab Swapping
+        tabVisualizerBtn.onclick = () => {
+            tabVisualizer.classList.remove('hidden');
+            tabBigO.classList.add('hidden');
+            tabVisualizerBtn.className = "flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all duration-200 bg-sky-500 text-white shadow";
+            tabBigOBtn.className = "flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-slate-200";
+        };
+
+        tabBigOBtn.onclick = () => {
+            tabBigO.classList.remove('hidden');
+            tabVisualizer.classList.add('hidden');
+            tabBigOBtn.className = "flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all duration-200 bg-purple-600 text-white shadow";
+            tabVisualizerBtn.className = "flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-slate-200";
+        };
+
+        // Event Listeners para Controles
+        arraySizeSlider.oninput = (e) => {
+            arraySizeVal.innerText = e.target.value;
+            generateNewArray();
+        };
+
+        speedSlider.oninput = (e) => {
+            const val = parseInt(e.target.value);
+            if (val < 30) speedVal.innerText = "Lenta";
+            else if (val < 70) speedVal.innerText = "Média";
+            else speedVal.innerText = "Rápida";
+        };
+
+        algorithmSelect.onchange = () => {
+            updateAlgorithmCard();
+            resetState();
+        };
+
+        arrayTypeSelect.onchange = () => {
+            generateNewArray();
+        };
+
+        resetBtn.onclick = () => {
+            generateNewArray();
+        };
+
+        // ==============================================================================
+        // GERAÇÃO E RENDERIZAÇÃO DO ARRAY
+        // ==============================================================================
+        function generateNewArray() {
+            stopAnimation();
+            const size = parseInt(arraySizeSlider.value);
+            const type = arrayTypeSelect.value;
+            array = [];
+
+            if (type === 'random') {
+                for (let i = 0; i < size; i++) {
+                    array.push(Math.floor(Math.random() * 85) + 15);
+                }
+            } else if (type === 'nearly-sorted') {
+                for (let i = 0; i < size; i++) {
+                    array.push(Math.floor((i / size) * 85) + 15);
+                }
+                // Faz algumas poucas trocas
+                for (let i = 0; i < Math.floor(size / 6); i++) {
+                    const idx1 = Math.floor(Math.random() * size);
+                    const idx2 = Math.floor(Math.random() * size);
+                    [array[idx1], array[idx2]] = [array[idx2], array[idx1]];
+                }
+            } else if (type === 'reversed') {
+                for (let i = 0; i < size; i++) {
+                    array.push(Math.floor(((size - i) / size) * 85) + 15);
+                }
+            }
+
+            renderBars();
+            resetMetrics();
+        }
+
+        function renderBars(activeIndices = {}, sortedIndices = new Set()) {
+            barContainer.innerHTML = '';
+            const maxVal = Math.max(...array, 100);
+
+            array.forEach((val, idx) => {
+                const bar = document.createElement('div');
+                bar.className = 'flex-1 rounded-t-sm bar-transition flex flex-col justify-end items-center relative group';
+                bar.style.height = `${(val / maxVal) * 100}%`;
+
+                // Cores de Acordo com o Estado
+                if (sortedIndices.has(idx)) {
+                    bar.style.backgroundColor = '#4ade80'; // Verde Ordenado
+                } else if (activeIndices.swap?.includes(idx)) {
+                    bar.style.backgroundColor = '#f87171'; // Vermelho Troca
+                } else if (activeIndices.compare?.includes(idx)) {
+                    bar.style.backgroundColor = '#facc15'; // Amarelo Comparação
+                } else {
+                    bar.style.backgroundColor = '#38bdf8'; // Azul Padrão
+                }
+
+                // Tooltip com o valor do elemento
+                if (array.length <= 50) {
+                    const label = document.createElement('span');
+                    label.className = 'text-[10px] font-bold text-slate-900 mb-1 select-none hidden sm:block';
+                    label.innerText = val;
+                    bar.appendChild(label);
+                }
+
+                barContainer.appendChild(bar);
+            });
+        }
+
+        function resetMetrics() {
+            comparisonsCount = 0;
+            swapsCount = 0;
+            metricComparisons.innerText = '0';
+            metricSwaps.innerText = '0';
+            metricTime.innerText = '0.0 ms';
+            executionStatus.innerText = 'Pronto para iniciar.';
+            executionStatus.className = 'p-3 rounded-xl bg-slate-900 border border-slate-800 text-center text-xs text-slate-400';
+        }
+
+        function updateAlgorithmCard() {
+            const key = algorithmSelect.value;
+            const info = ALGORITHM_INFO[key];
+            document.getElementById('algoTitle').innerText = info.name;
+            document.getElementById('algoBadge').innerText = info.badge;
+            document.getElementById('algoDesc').innerText = info.desc;
+            document.getElementById('algoBest').innerText = info.best;
+            document.getElementById('algoAvg').innerText = info.avg;
+            document.getElementById('algoWorst').innerText = info.worst;
+            document.getElementById('algoSpace').innerText = info.space;
+        }
+
+        // ==============================================================================
+        // MOTOR DE ANIMAÇÃO E PASSO A PASSO
+        // ==============================================================================
+        startBtn.onclick = () => {
+            if (isRunning && isPaused) {
+                isPaused = false;
+                startBtn.disabled = true;
+                pauseBtn.disabled = false;
+                stepBtn.disabled = true;
+                executionStatus.innerText = 'Executando...';
+                playAnimation();
+                return;
+            }
+
+            // Gerar lista de passos do algoritmo selecionado
+            const algoKey = algorithmSelect.value;
+            const arrayCopy = [...array];
+            animationSteps = [];
+            
+            // Gerar passos
+            generators[algoKey](arrayCopy);
+
+            currentStep = 0;
+            isRunning = true;
+            isPaused = false;
+            startTime = performance.now();
+
+            startBtn.disabled = true;
+            pauseBtn.disabled = false;
+            stepBtn.disabled = true;
+            executionStatus.innerText = 'Executando...';
+            executionStatus.className = 'p-3 rounded-xl bg-sky-950/60 border border-sky-800 text-center text-xs text-sky-400 font-semibold';
+
+            playAnimation();
+        };
+
+        pauseBtn.onclick = () => {
+            if (!isRunning) return;
+            isPaused = true;
+            clearTimeout(animationTimeout);
+            startBtn.disabled = false;
+            pauseBtn.disabled = true;
+            stepBtn.disabled = false;
+            executionStatus.innerText = 'Pausado.';
+            executionStatus.className = 'p-3 rounded-xl bg-amber-950/60 border border-amber-800 text-center text-xs text-amber-400 font-semibold';
+        };
+
+        stepBtn.onclick = () => {
+            if (currentStep < animationSteps.length) {
+                executeStep(animationSteps[currentStep]);
+                currentStep++;
+            } else {
+                finishAnimation();
+            }
+        };
+
+        function stopAnimation() {
+            clearTimeout(animationTimeout);
+            isRunning = false;
+            isPaused = false;
+            startBtn.disabled = false;
+            pauseBtn.disabled = true;
+            stepBtn.disabled = true;
+        }
+
+        function playAnimation() {
+            if (isPaused || !isRunning) return;
+
+            if (currentStep < animationSteps.length) {
+                executeStep(animationSteps[currentStep]);
+                currentStep++;
+
+                // Calcula delay baseado na velocidade do slider
+                const speedVal = parseInt(speedSlider.value);
+                const delay = Math.max(2, 200 - (speedVal * 1.95));
+
+                animationTimeout = setTimeout(playAnimation, delay);
+            } else {
+                finishAnimation();
+            }
+        }
+
+        function executeStep(step) {
+            array = [...step.array];
+            if (step.type === 'compare') {
+                comparisonsCount++;
+                metricComparisons.innerText = comparisonsCount;
+            } else if (step.type === 'swap' || step.type === 'write') {
+                swapsCount++;
+                metricSwaps.innerText = swapsCount;
+            }
+
+            const elapsed = (performance.now() - startTime).toFixed(1);
+            metricTime.innerText = `${elapsed} ms`;
+
+            renderBars(
+                { compare: step.compare, swap: step.swap },
+                new Set(step.sorted || [])
+            );
+        }
+
+        function finishAnimation() {
+            stopAnimation();
+            const allSorted = new Set(Array.from({ length: array.length }, (_, i) => i));
+            renderBars({}, allSorted);
+
+            const totalTime = (performance.now() - startTime).toFixed(1);
+            metricTime.innerText = `${totalTime} ms`;
+
+            executionStatus.innerText = 'Concluído com Sucesso!';
+            executionStatus.className = 'p-3 rounded-xl bg-emerald-950/60 border border-emerald-800 text-center text-xs text-emerald-400 font-bold';
+        }
+
+        // ==============================================================================
+        // GERADORES DE PASSOS DE ANIMAÇÃO PARA TODOS OS 9 ALGORITMOS
+        // ==============================================================================
+        const generators = {
+            // 1. SELECTION SORT
+            selection: (arr) => {
+                const n = arr.length;
+                for (let i = 0; i < n; i++) {
+                    let minIdx = i;
+                    for (let j = i + 1; j < n; j++) {
+                        animationSteps.push({
+                            type: 'compare',
+                            array: [...arr],
+                            compare: [j, minIdx],
+                            sorted: Array.from({length: i}, (_, k) => k)
+                        });
+                        if (arr[j] < arr[minIdx]) minIdx = j;
+                    }
+                    if (minIdx !== i) {
+                        [arr[i], arr[minIdx]] = [arr[minIdx], arr[i]];
+                        animationSteps.push({
+                            type: 'swap',
+                            array: [...arr],
+                            swap: [i, minIdx],
+                            sorted: Array.from({length: i + 1}, (_, k) => k)
+                        });
+                    }
+                }
+            },
+
+            // 2. BUBBLE SORT
+            bubble: (arr) => {
+                const n = arr.length;
+                for (let i = 0; i < n; i++) {
+                    let swapped = false;
+                    for (let j = 0; j < n - i - 1; j++) {
+                        animationSteps.push({
+                            type: 'compare',
+                            array: [...arr],
+                            compare: [j, j + 1]
+                        });
+                        if (arr[j] > arr[j + 1]) {
+                            [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
+                            swapped = true;
+                            animationSteps.push({
+                                type: 'swap',
+                                array: [...arr],
+                                swap: [j, j + 1]
+                            });
+                        }
+                    }
+                    if (!swapped) break;
+                }
+            },
+
+            // 3. INSERTION SORT
+            insertion: (arr) => {
+                const n = arr.length;
+                for (let i = 1; i < n; i++) {
+                    let key = arr[i];
+                    let j = i - 1;
+                    while (j >= 0 && arr[j] > key) {
+                        animationSteps.push({
+                            type: 'compare',
+                            array: [...arr],
+                            compare: [j, j + 1]
+                        });
+                        arr[j + 1] = arr[j];
+                        animationSteps.push({
+                            type: 'swap',
+                            array: [...arr],
+                            swap: [j, j + 1]
+                        });
+                        j--;
+                    }
+                    arr[j + 1] = key;
+                }
+            },
+
+            // 4. MERGE SORT
+            merge: (arr) => {
+                function mergeSortHelper(mainArr, start, end) {
+                    if (start >= end) return;
+                    const mid = Math.floor((start + end) / 2);
+                    mergeSortHelper(mainArr, start, mid);
+                    mergeSortHelper(mainArr, mid + 1, end);
+                    merge(mainArr, start, mid, end);
+                }
+
+                function merge(mainArr, start, mid, end) {
+                    let left = mainArr.slice(start, mid + 1);
+                    let right = mainArr.slice(mid + 1, end + 1);
+                    let i = 0, j = 0, k = start;
+
+                    while (i < left.length && j < right.length) {
+                        animationSteps.push({
+                            type: 'compare',
+                            array: [...mainArr],
+                            compare: [start + i, mid + 1 + j]
+                        });
+                        if (left[i] <= right[j]) {
+                            mainArr[k] = left[i];
+                            i++;
+                        } else {
+                            mainArr[k] = right[j];
+                            j++;
+                        }
+                        animationSteps.push({
+                            type: 'write',
+                            array: [...mainArr],
+                            swap: [k]
+                        });
+                        k++;
+                    }
+                    while (i < left.length) {
+                        mainArr[k] = left[i];
+                        animationSteps.push({ type: 'write', array: [...mainArr], swap: [k] });
+                        i++; k++;
+                    }
+                    while (j < right.length) {
+                        mainArr[k] = right[j];
+                        animationSteps.push({ type: 'write', array: [...mainArr], swap: [k] });
+                        j++; k++;
+                    }
+                }
+                mergeSortHelper(arr, 0, arr.length - 1);
+            },
+
+            // 5. QUICK SORT
+            quick: (arr) => {
+                function quickSortHelper(mainArr, low, high) {
+                    if (low < high) {
+                        let pivotIdx = partition(mainArr, low, high);
+                        quickSortHelper(mainArr, low, pivotIdx - 1);
+                        quickSortHelper(mainArr, pivotIdx + 1, high);
+                    }
+                }
+
+                function partition(mainArr, low, high) {
+                    let pivot = mainArr[high];
+                    let i = low - 1;
+                    for (let j = low; j < high; j++) {
+                        animationSteps.push({
+                            type: 'compare',
+                            array: [...mainArr],
+                            compare: [j, high]
+                        });
+                        if (mainArr[j] < pivot) {
+                            i++;
+                            [mainArr[i], mainArr[j]] = [mainArr[j], mainArr[i]];
+                            animationSteps.push({
+                                type: 'swap',
+                                array: [...mainArr],
+                                swap: [i, j]
+                            });
+                        }
+                    }
+                    [mainArr[i + 1], mainArr[high]] = [mainArr[high], mainArr[i + 1]];
+                    animationSteps.push({
+                        type: 'swap',
+                        array: [...mainArr],
+                        swap: [i + 1, high]
+                    });
+                    return i + 1;
+                }
+                quickSortHelper(arr, 0, arr.length - 1);
+            },
+
+            // 6. HEAP SORT
+            heap: (arr) => {
+                const n = arr.length;
+                function heapify(mainArr, heapSize, rootIdx) {
+                    let largest = rootIdx;
+                    let left = 2 * rootIdx + 1;
+                    let right = 2 * rootIdx + 2;
+
+                    if (left < heapSize) {
+                        animationSteps.push({ type: 'compare', array: [...mainArr], compare: [left, largest] });
+                        if (mainArr[left] > mainArr[largest]) largest = left;
+                    }
+                    if (right < heapSize) {
+                        animationSteps.push({ type: 'compare', array: [...mainArr], compare: [right, largest] });
+                        if (mainArr[right] > mainArr[largest]) largest = right;
+                    }
+
+                    if (largest !== rootIdx) {
+                        [mainArr[rootIdx], mainArr[largest]] = [mainArr[largest], mainArr[rootIdx]];
+                        animationSteps.push({ type: 'swap', array: [...mainArr], swap: [rootIdx, largest] });
+                        heapify(mainArr, heapSize, largest);
+                    }
+                }
+
+                for (let i = Math.floor(n / 2) - 1; i >= 0; i--) heapify(arr, n, i);
+                for (let i = n - 1; i > 0; i--) {
+                    [arr[0], arr[i]] = [arr[i], arr[0]];
+                    animationSteps.push({ type: 'swap', array: [...arr], swap: [0, i] });
+                    heapify(arr, i, 0);
+                }
+            },
+
+            // 7. COUNTING SORT
+            counting: (arr) => {
+                if (arr.length === 0) return;
+                let max = Math.max(...arr);
+                let count = new Array(max + 1).fill(0);
+
+                for (let i = 0; i < arr.length; i++) {
+                    count[arr[i]]++;
+                    animationSteps.push({ type: 'compare', array: [...arr], compare: [i] });
+                }
+
+                let idx = 0;
+                for (let i = 0; i <= max; i++) {
+                    while (count[i] > 0) {
+                        arr[idx] = i;
+                        animationSteps.push({ type: 'write', array: [...arr], swap: [idx] });
+                        idx++;
+                        count[i]--;
+                    }
+                }
+            },
+
+            // 8. RADIX SORT
+            radix: (arr) => {
+                let max = Math.max(...arr, 0);
+                let exp = 1;
+
+                while (Math.floor(max / exp) > 0) {
+                    let output = new Array(arr.length).fill(0);
+                    let count = new Array(10).fill(0);
+
+                    for (let i = 0; i < arr.length; i++) {
+                        let digit = Math.floor(arr[i] / exp) % 10;
+                        count[digit]++;
+                        animationSteps.push({ type: 'compare', array: [...arr], compare: [i] });
+                    }
+
+                    for (let i = 1; i < 10; i++) count[i] += count[i - 1];
+
+                    for (let i = arr.length - 1; i >= 0; i--) {
+                        let digit = Math.floor(arr[i] / exp) % 10;
+                        output[count[digit] - 1] = arr[i];
+                        count[digit]--;
+                    }
+
+                    for (let i = 0; i < arr.length; i++) {
+                        arr[i] = output[i];
+                        animationSteps.push({ type: 'write', array: [...arr], swap: [i] });
+                    }
+                    exp *= 10;
+                }
+            },
+
+            // 9. BUCKET SORT
+            bucket: (arr) => {
+                let n = arr.length;
+                if (n <= 0) return;
+
+                let min = Math.min(...arr);
+                let max = Math.max(...arr);
+                let bucketCount = Math.floor(Math.sqrt(n));
+                let buckets = Array.from({ length: bucketCount }, () => []);
+
+                for (let i = 0; i < n; i++) {
+                    let bucketIdx = Math.floor(((arr[i] - min) / (max - min + 1)) * bucketCount);
+                    buckets[bucketIdx].append ? buckets[bucketIdx].append(arr[i]) : buckets[bucketIdx].push(arr[i]);
+                    animationSteps.push({ type: 'compare', array: [...arr], compare: [i] });
+                }
+
+                let idx = 0;
+                for (let i = 0; i < bucketCount; i++) {
+                    // Insertion sort em cada bucket
+                    for (let j = 1; j < buckets[i].length; j++) {
+                        let key = buckets[i][j];
+                        let k = j - 1;
+                        while (k >= 0 && buckets[i][k] > key) {
+                            buckets[i][k + 1] = buckets[i][k];
+                            k--;
+                        }
+                        buckets[i][k + 1] = key;
+                    }
+                    // Escreve de volta
+                    for (let j = 0; j < buckets[i].length; j++) {
+                        arr[idx] = buckets[i][j];
+                        animationSteps.push({ type: 'write', array: [...arr], swap: [idx] });
+                        idx++;
+                    }
+                }
+            }
+        };
+
+        // ==============================================================================
+        // ABA 2: GRÁFICO CHART.JS DE COMPLEXIDADE BIG-O
+        // ==============================================================================
+        let bigOChart = null;
+
+        function initChart() {
+            const ctx = document.getElementById('bigOChart').getContext('2d');
+
+            // Gerar dados teóricos para N = 1 a 50
+            const labels = Array.from({ length: 25 }, (_, i) => (i + 1) * 2); // 2, 4, 6... 50
+
+            const dataO1 = labels.map(() => 5);
+            const dataON = labels.map(n => n);
+            const dataONLogN = labels.map(n => n * Math.log2(n));
+            const dataON2 = labels.map(n => Math.pow(n, 2));
+
+            bigOChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'O(1) - Constante',
+                            data: dataO1,
+                            borderColor: '#4ade80',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            pointRadius: 0
+                        },
+                        {
+                            label: 'O(N) - Linear',
+                            data: dataON,
+                            borderColor: '#38bdf8',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            pointRadius: 0
+                        },
+                        {
+                            label: 'O(N log N) - Quase Linear',
+                            data: dataONLogN,
+                            borderColor: '#a855f7',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            pointRadius: 0
+                        },
+                        {
+                            label: 'O(N²) - Quadrática',
+                            data: dataON2,
+                            borderColor: '#f87171',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            pointRadius: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#94a3b8',
+                                font: { family: 'Inter', size: 11 }
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Tamanho da Entrada (N)', color: '#64748b' },
+                            grid: { color: '#334155' },
+                            ticks: { color: '#94a3b8' }
+                        },
+                        y: {
+                            title: { display: true, text: 'Número Relativo de Operações', color: '#64748b' },
+                            grid: { color: '#334155' },
+                            ticks: { color: '#94a3b8' },
+                            max: 1000
+                        }
+                    }
+                }
+            });
+        }
+
+        // BENCHMARK COMPUTAÇÃO REAL NO NAVEGADOR
+        document.getElementById('runBenchmarkBtn').onclick = () => {
+            const sampleSizes = [10, 30, 60, 100, 150];
+            const quickResults = [];
+            const bubbleResults = [];
+
+            sampleSizes.forEach(size => {
+                const testArray = Array.from({ length: size }, () => Math.floor(Math.random() * 1000));
+                
+                // Medir Quick Sort
+                let stepsQ = [];
+                generators.quick([...testArray]);
+                quickResults.push(stepsQ.length || size * Math.log2(size));
+
+                // Medir Bubble Sort
+                let stepsB = [];
+                generators.bubble([...testArray]);
+                bubbleResults.push(stepsB.length || Math.pow(size, 2));
+            });
+
+            // Adicionar dados reais ao gráfico
+            bigOChart.data.labels = sampleSizes;
+            bigOChart.data.datasets.push({
+                label: 'Quick Sort (Empírico)',
+                data: quickResults,
+                borderColor: '#facc15',
+                borderDash: [5, 5],
+                borderWidth: 3,
+                pointRadius: 4
+            });
+            bigOChart.options.scales.y.max = undefined; // Libera limite Y
+            bigOChart.update();
+        };
+    </script>
+</body>
+</html>
